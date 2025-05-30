@@ -100,7 +100,7 @@ def plot_reduced_latent_space(model, dataloader, dataloader_adversarial, model_f
 
     mean = np.mean(combined_latent, axis=0)
     std = np.std(combined_latent, axis=0)
-    normalized_latent = (combined_latent - mean) / std
+    #normalized_latent = (combined_latent - mean) / std
 
     if dimensionality_reduction == 'tSNE':
         tsne = TSNE(n_components=2, perplexity=30, random_state=42)

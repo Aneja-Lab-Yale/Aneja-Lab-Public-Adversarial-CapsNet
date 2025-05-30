@@ -177,7 +177,7 @@ def main(data_flag, num_epochs, gpu_ids, batch_size, download, model_flag,
     iteration = 0
 
     for epoch in trange(num_epochs):
-        train_loss = train(model, train_loader, model_flag, criterion, optimizer, device, None, deno_method)
+        train_loss = train(model, train_loader, model_flag, criterion, optimizer, device, None)
 
         train_metrics = test(model, train_evaluator, train_loader_at_eval, model_flag, criterion, device, run)
         val_metrics = test(model, val_evaluator, val_loader, model_flag, criterion, device, run)
@@ -246,7 +246,8 @@ def main(data_flag, num_epochs, gpu_ids, batch_size, download, model_flag,
     elif experiment == 'gradcam':
         # GRAD CAM
         standard_grad_cams = grad_cam(best_model, test_loader, model_flag, data_flag, device, plot_cam=True)
-
+        os.makedirs('gradcam_npy', exist_ok=True)
+        np.save(f'gradcam_npy/{data_flag}_{model_flag}_{eps}_original.npy', standard_grad_cams)
         # GRAD CAM (adversarial)
         x_test_adv, y_test_adv = generate_adversarial_examples_from_model_input(best_model, input_shape,
                                                     train_loader_at_eval, val_loader, test_loader,
@@ -257,6 +258,7 @@ def main(data_flag, num_epochs, gpu_ids, batch_size, download, model_flag,
         adv_loader_custom = zip([torch.from_numpy(adv_batch) for adv_batch in x_test_adv], y_test_adv)
         adv_flag = model_flag + '_adv_eps_{:.2f}'.format(eps)
         adv_grad_cams = grad_cam(best_model, adv_loader_custom, adv_flag, data_flag, device, plot_cam=True)
+        np.save(f'gradcam_npy/{data_flag}_{model_flag}_{eps}_adversarial.npy', adv_grad_cams)
 
         # QUANTITATIVE GRAD CAM OVERLAP
         similarities = [gradcam_similarity(standard_cam, adv_cam, percent=20) for standard_cam, adv_cam in zip(standard_grad_cams, adv_grad_cams)]
@@ -280,15 +282,13 @@ def main(data_flag, num_epochs, gpu_ids, batch_size, download, model_flag,
 
 
 
-def train(model, train_loader, model_flag, criterion, optimizer, device, writer, deno_method):
+def train(model, train_loader, model_flag, criterion, optimizer, device, writer):
     total_loss = []
     global iteration
 
     model.train()
     for batch_idx, (inputs, targets) in enumerate(train_loader):
         optimizer.zero_grad()
-        if deno_method is not None:
-            inputs = deno_method(inputs)
 
         inputs = inputs.to(device)
         targets = torch.eye(n_classes).index_select(dim=0, index=targets).to(device)

@@ -44,7 +44,7 @@ from models.resnets import ResNet18, ResNet50
 from models.MedViT import MedViT_small
 import medmnist
 from medmnist import INFO
-from sensitviity import *
+from sensitivity import *
 from grad_cam import *
 from latent_space import *
 from utils import *
@@ -174,7 +174,7 @@ def main(data_flag, num_epochs, gpu_ids, batch_size, download, model_flag,
     iteration = 0
 
     for epoch in trange(num_epochs):
-        train_loss = train(model, train_loader, model_flag, criterion, optimizer, device, None, deno_method)
+        train_loss = train(model, train_loader, model_flag, criterion, optimizer, device, None)
 
         train_metrics = test(model, train_evaluator, train_loader_at_eval, model_flag, criterion, device, run)
         val_metrics = test(model, val_evaluator, val_loader, model_flag, criterion, device, run)
@@ -245,6 +245,7 @@ def main(data_flag, num_epochs, gpu_ids, batch_size, download, model_flag,
     elif experiment == 'gradcam':
         # GRAD CAM
         standard_grad_cams = grad_cam(best_model, test_loader, model_flag, data_flag, device, plot_cam=False)
+        os.makedirs('gradcam_npy', exist_ok=True)
         np.save(f'gradcam_npy/{data_flag}_{model_flag}_{eps}_original.npy', standard_grad_cams)
 
         # GRAD CAM (adversarial)
@@ -280,15 +281,13 @@ def main(data_flag, num_epochs, gpu_ids, batch_size, download, model_flag,
             raise ValueError("Invalid experiment {}".format(experiment))
 
 
-def train(model, train_loader, model_flag, criterion, optimizer, device, writer, deno_method):
+def train(model, train_loader, model_flag, criterion, optimizer, device, writer):
     total_loss = []
     global iteration
 
     model.train()
     for batch_idx, (inputs, targets) in enumerate(train_loader):
         optimizer.zero_grad()
-        if deno_method is not None:
-            inputs = deno_method(inputs)
 
         inputs = inputs.to(device)
         targets = torch.squeeze(targets, dim=1)

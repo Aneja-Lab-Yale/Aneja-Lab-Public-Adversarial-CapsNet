@@ -300,6 +300,7 @@ def generate_and_test_adversarial(
     auc_scores = []
 
     save_dir = 'adv_output'
+    os.makedirs(save_dir, exist_ok=True)
 
     if resize:
         acc_scores_save_path = f"adv_output/{data_flag}_{model_flag}_224_{attack_type}_acc_strong.npy"

@@ -1,3 +1,4 @@
 *.pth
 *.npz
 *.png
+!figs/*.png

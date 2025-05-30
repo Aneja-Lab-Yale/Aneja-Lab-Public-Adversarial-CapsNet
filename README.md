@@ -12,7 +12,7 @@ stable feature spaces and attention maps after the attacks.
 ## Contents:
 Use these links to easily navigate through this readme:
 
-1. [Installation and SetUp](#getting-started)
+1. [Installation and Set Up](#getting-started)
 2. [File Structure](#file-structure)
 3. [Public Data](#data)
 4. [Training](#training)
@@ -22,7 +22,7 @@ Use these links to easily navigate through this readme:
 
 
 
-## Installation and SetUp:
+## Installation and Set Up:
 ### Getting Started:
 1) First clone this repository:
 
@@ -67,10 +67,19 @@ The cloned repository will have the following file structure. Descriptions of ma
 ├── train_mnist.sh             # executable to train all MNIST models
 ```
 ## Data:
-Images and clinical data used to train and test our pretrained EPE-Net and SVI-Net models are only available through a Data Use Agreement (DUA).
 
-The [PROSTATE-DIAGNOSIS](https://www.cancerimagingarchive.net/collection/prostate-diagnosis/) dataset--including MRI images, clinical metadata, and prostate and seminal vesicle segmentations--are publically available through [The Cancer Imaging Archive (TCIA)](https://www.cancerimagingarchive.net). 
+All data used in this study is publicly available. MNIST is downloaded from the torchvision.datasets module.
+Descriptions of all MedMNIST datasets can be found here. For downloading all datasets for our experiments,
+simply include the --download flag in the command line arguments (see more detailed information below(#training).
 
+## Training:
+
+## Adversarial Sensitivity
+
+## Interpretability
+### Latent Space
+
+### Grad-Cam
 
 ## References:
 [Hossain, S., Hossain, S., Sritharan, D., Fu, D., Nene, A., Hossain, J., Chadha, S., Kim, I., Lin, M., Aboian, M. and Aneja, S., 2025. Deep Learning Identified Extra-Prostatic Extension and Seminal Vesicle Invasion as an MRI Biomarker for Prostate Cancer Outcomes. medRxiv, pp.2024-12.](https://www.medrxiv.org/content/10.1101/2024.12.31.24319822v1)

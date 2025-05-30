@@ -148,7 +148,8 @@ of epsilon (default=0.032).
 ## References:
 [Lei, Y., Wu, Z., Li, Z., Yang, Y. and Liang, Z., 2023. BP-CapsNet: An image-based Deep Learning method for medical diagnosis. *Applied Soft Computing*, 146, 110683.](https://www.sciencedirect.com/science/article/pii/S1568494623007019)
 
-[Yang, J., Shi, R., Wei, D., Liu, Z., Zhao, L., Ke, B., Pfister, H. and Ni, B., 2023. MedMNIST v2—A large-scale lightweight benchmark for 2D and 3D biomedical image classification. *Scientific Data*.](https://www.nature.com/articles/s41597-022-01721-8)
+[Manzari, O. N., Ahmadabadi, H., Kashiani, H., Shokouhi, S. B., and Ayatollahi, A., 2023. MedViT: A robust vision transformer for generalized medical image classification. *Computers in Biology and Medicine*, 157, 106791.](https://doi.org/10.1016/j.compbiomed.2023.106791)
 
 [Torres, J. and Gildenblat, J., 2021. pytorch-grad-cam: Gradient-weighted Class Activation Mapping (Grad-CAM) in PyTorch. *GitHub repository*.](https://github.com/jacobgil/pytorch-grad-cam)
- 
+
+[Yang, J., Shi, R., Wei, D., Liu, Z., Zhao, L., Ke, B., Pfister, H. and Ni, B., 2023. MedMNIST v2—A large-scale lightweight benchmark for 2D and 3D biomedical image classification. *Scientific Data*.](https://www.nature.com/articles/s41597-022-01721-8)

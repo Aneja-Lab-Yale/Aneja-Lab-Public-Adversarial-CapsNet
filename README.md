@@ -72,7 +72,7 @@ The cloned repository will have the following file structure. Descriptions of ma
 
 All data used in this study is publicly available. MNIST is downloaded from the torchvision.datasets module.
 Descriptions of all MedMNIST datasets can be found [here](https://medmnist.com/). For downloading all datasets for our experiments,
-simply include the --download flag in the command line arguments (see more detailed information [below](#training)).
+simply include the **--download** flag in the command line arguments (see more detailed information [below](#training)).
 
 ## Training:
 ### MNIST
@@ -140,12 +140,18 @@ In latent space experiments, a model's latent space embeddings for all test set 
 before and after an adversarial attack. A tSNE dimensionality reduction is used to reduce the latent embeddings
 into 2D space. To change the attack type, use the **--attack_type** argument to choose between {pgd=default, fgsm}.
 To change the strneght of the attack, use the **--eps** arguments to set the values of epsilon (default=0.032).
+Output will be stored as an npz file with path following latent_space/{dataset_name}/{model_name}/tSNE_latent_data.npz.
+This file contains four np arrays with keys {og_latent, adv_latent, og_targets, adv_targets}. The latent arrays are of
+shape (N,2) representing the 2-dimensional embeddings of all N points. The targets are of shape (N,) representing the
+corresponding labels of all N points.
 
 ### Grad-Cam:
 In Grad-Cam experiments, attention maps for all test set examples are visualized
 before and after an adversarial attack. To change the attack type, use the **--attack_type** argument to choose
 between {pgd=default, fgsm}. To change the strneght of the attack, use the **--eps** arguments to set the values
-of epsilon (default=0.032).
+of epsilon (default=0.032). Output will be stored as two npy files (original and adversarial) in the gradcam_npy
+folder. Arrays are of shape (N, C, 28, 28) or (N, C, 224, 224) correspondings to N samples, C channels, and 28x28
+or 224x224 input images. Each (C, 28, 28) or (C, 244, 244) image represents an individual Grad-Cam.
 
 ## References:
 [Lei, Y., Wu, Z., Li, Z., Yang, Y. and Liang, Z., 2023. BP-CapsNet: An image-based Deep Learning method for medical diagnosis. *Applied Soft Computing*, 146, 110683.](https://www.sciencedirect.com/science/article/pii/S1568494623007019)

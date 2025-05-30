@@ -16,8 +16,8 @@ Use these links to easily navigate through this readme:
 2. [File Structure](#file-structure)
 3. [Public Data](#data)
 4. [Training](#training)
-5. [Adversarial Sensitivity](#sensitivity)
-6. [Latent Space and Grad-Cam](#interpretability)
+5. [Adversarial Sensitivity](#adversarial-sensitivity)
+6. [Interpretability](#latent-space)
 7. [References](#references)
 
 
@@ -30,7 +30,7 @@ Use these links to easily navigate through this readme:
 git clone https://github.com/Aneja-Lab-Yale/Aneja-Lab-Public-Adversarial-CapsNet
 ```
 
-2) Navigate to the cloned repository and run the following command to create the appropriate environment with the appropriate software packages:
+2) Navigate to the cloned repository and run the following commands to create the appropriate environment with the appropriate software packages:
 
 ```bash
 cd Aneja-Lab-Public-Adversarial-CapsNet
@@ -70,10 +70,10 @@ The cloned repository will have the following file structure. Descriptions of ma
 
 All data used in this study is publicly available. MNIST is downloaded from the torchvision.datasets module.
 Descriptions of all MedMNIST datasets can be found [here](https://medmnist.com/). For downloading all datasets for our experiments,
-simply include the --download flag in the command line arguments (see more detailed information [below](#training).
+simply include the --download flag in the command line arguments (see more detailed information [below](#training)).
 
 ## Training:
-
+### MNIST
 To train all models (ResNets-18, ResNet-50, MedViT, DR-Caps, BP-Caps)
 on MNIST simply run:
 
@@ -81,10 +81,8 @@ on MNIST simply run:
 ./train_mnist.sh
 ```
 
-Note: training is currently set to 100 epochs. This may take a while (a few days)
-to run. Good results can be achieved with 5-10 epochs of training. You can change
-the training time in train_mnist.sh with the num_epochs command line argument.
 
+### MedMNIST
 To train all models (ResNets-18, ResNet-50, MedViT, DR-Caps, BP-Caps)
 on the four selected MedMNIST datasets (BreastMNIST, PneumoniaMNIST,
 NoduleMNIST3D, BloodMNIST) simply run:
@@ -93,9 +91,47 @@ NoduleMNIST3D, BloodMNIST) simply run:
 ./train_medmnist.sh
 ```
 
-## Adversarial Sensitivity:
+Notes:
+- To only run a certain set of experiments, comment out lines in ARG_LIST
+  corresponding to experiments you wish to exclude.
+- If a certain dataset has not been downloaded, include the **--download** flag in the command line arguments
+  within the appropriate shell script for the first model that uses this dataset.
+- The MedViT model uses the **--resize** flag to resize input images from size (28,28) -> (224, 224)
+  following the original paper.
+- Training for MNIST experiments is currently set to 100 epochs. This may take a while (a few days)
+to run. Good results can be achieved with 5-10 epochs of training. You can change
+the training time in train_mnist.sh with the **--num_epochs** command line argument. Training for MedMNIST
+datasets is relatively quick we have found 100 epochs to be a reasonable training time.
 
-## Interpretability:
+After training, all models should be stored in a folder called checkpoints.
+
+## Adversarial Attacks:
+
+Once all models have been trainined, to run all adversarial sensitivty, latent space, and grad-cam
+experiments for MNIST models simply run:
+
+```bash
+./experiments_mnist.sh
+```
+
+To run all adversarial sensitivty, latent space, and grad-cam experiments for MNIST models simply run:
+
+```bash
+./experiments_medmnist.sh
+```
+
+Notes:
+- To only run a certain set of experiments, comment out lines in ARG_LIST
+  corresponding to experiments you wish to exclude.
+- The **--experiment** argument controls the type of experiment being run.
+  It can be set to {sensitivity, latent_space, grad_cam}.
+
+### Adversarial Sensitivity:
+In adversarial sensitivity experiments, models are tested against adversarial attacks of
+varying strength (eps = {0.001, 0.002, 0.004, ... 0.256}). To change the attack type, use
+the **--attack_type** argument to choose between {pgd=default, fgsm}. Results will be stored
+as npy files in a folder called adv_output.
+
 ### Latent Space:
 
 ### Grad-Cam:

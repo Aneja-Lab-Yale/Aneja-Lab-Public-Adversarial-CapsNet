@@ -146,7 +146,9 @@ between {pgd=default, fgsm}. To change the strneght of the attack, use the **--e
 of epsilon (default=0.032).
 
 ## References:
-[Hossain, S., Hossain, S., Sritharan, D., Fu, D., Nene, A., Hossain, J., Chadha, S., Kim, I., Lin, M., Aboian, M. and Aneja, S., 2025. Deep Learning Identified Extra-Prostatic Extension and Seminal Vesicle Invasion as an MRI Biomarker for Prostate Cancer Outcomes. medRxiv, pp.2024-12.](https://www.medrxiv.org/content/10.1101/2024.12.31.24319822v1)
+[Lei, Y., Wu, Z., Li, Z., Yang, Y. and Liang, Z., 2023. BP-CapsNet: An image-based Deep Learning method for medical diagnosis. *Applied Soft Computing*, 146, 110683.](https://www.sciencedirect.com/science/article/pii/S1568494623007019)
 
-[Isensee, F., Jaeger, P. F., Kohl, S. A., Petersen, J., & Maier-Hein, K. H. (2021). nnU-Net: a self-configuring method for deep learning-based biomedical image segmentation. Nature methods, 18(2), 203-211.](https://www.nature.com/articles/s41592-020-01008-z)
+[Yang, J., Shi, R., Wei, D., Liu, Z., Zhao, L., Ke, B., Pfister, H. and Ni, B., 2023. MedMNIST v2—A large-scale lightweight benchmark for 2D and 3D biomedical image classification. *Scientific Data*.](https://www.nature.com/articles/s41597-022-01721-8)
+
+[Torres, J. and Gildenblat, J., 2021. pytorch-grad-cam: Gradient-weighted Class Activation Mapping (Grad-CAM) in PyTorch. *GitHub repository*.](https://github.com/jacobgil/pytorch-grad-cam)
  

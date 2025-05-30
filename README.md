@@ -100,10 +100,11 @@ Notes:
   following the original paper.
 - Training for MNIST experiments is currently set to 100 epochs. This may take a while (a few days)
 to run. Good results can be achieved with 5-10 epochs of training. You can change
-the training time in train_mnist.sh with the **--num_epochs** command line argument. Training for MedMNIST
-datasets is relatively quick we have found 100 epochs to be a reasonable training time.
+the training time in train_mnist.sh with the **--num_epochs** command line argument.
+- Training for MedMNIST datasets is relatively quick and we have found 100 epochs (current default) to result
+  in a reasonable training time.
 
-After training, all models should be stored in a folder called checkpoints.
+After training, all models should be stored in a folder called _checkpoints_.
 
 ## Adversarial Attacks:
 
@@ -130,11 +131,19 @@ Notes:
 In adversarial sensitivity experiments, models are tested against adversarial attacks of
 varying strength (eps = {0.001, 0.002, 0.004, ... 0.256}). To change the attack type, use
 the **--attack_type** argument to choose between {pgd=default, fgsm}. Results will be stored
-as npy files in a folder called adv_output.
+as npy files in a folder called _adv_output_.
 
 ### Latent Space:
+In latent space experiments, a model's latent space embeddings for all test set examples are visualized
+before and after an adversarial attack. A tSNE dimensionality reduction is used to reduce the latent embeddings
+into 2D space. To change the attack type, use the **--attack_type** argument to choose between {pgd=default, fgsm}.
+To change the strneght of the attack, use the **--eps** arguments to set the values of epsilon (default=0.032).
 
 ### Grad-Cam:
+In Grad-Cam experiments, attention maps for all test set examples are visualized
+before and after an adversarial attack. To change the attack type, use the **--attack_type** argument to choose
+between {pgd=default, fgsm}. To change the strneght of the attack, use the **--eps** arguments to set the values
+of epsilon (default=0.032).
 
 ## References:
 [Hossain, S., Hossain, S., Sritharan, D., Fu, D., Nene, A., Hossain, J., Chadha, S., Kim, I., Lin, M., Aboian, M. and Aneja, S., 2025. Deep Learning Identified Extra-Prostatic Extension and Seminal Vesicle Invasion as an MRI Biomarker for Prostate Cancer Outcomes. medRxiv, pp.2024-12.](https://www.medrxiv.org/content/10.1101/2024.12.31.24319822v1)

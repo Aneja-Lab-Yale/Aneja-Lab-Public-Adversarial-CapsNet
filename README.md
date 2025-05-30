@@ -69,17 +69,36 @@ The cloned repository will have the following file structure. Descriptions of ma
 ## Data:
 
 All data used in this study is publicly available. MNIST is downloaded from the torchvision.datasets module.
-Descriptions of all MedMNIST datasets can be found here. For downloading all datasets for our experiments,
-simply include the --download flag in the command line arguments (see more detailed information below(#training).
+Descriptions of all MedMNIST datasets can be found [here](https://medmnist.com/). For downloading all datasets for our experiments,
+simply include the --download flag in the command line arguments (see more detailed information [below](#training).
 
 ## Training:
 
-## Adversarial Sensitivity
+To train all models (ResNets-18, ResNet-50, MedViT, DR-Caps, BP-Caps)
+on MNIST simply run:
 
-## Interpretability
-### Latent Space
+```bash
+./train_mnist.sh
+```
 
-### Grad-Cam
+Note: training is currently set to 100 epochs. This may take a while (a few days)
+to run. Good results can be achieved with 5-10 epochs of training. You can change
+the training time in train_mnist.sh with the num_epochs command line argument.
+
+To train all models (ResNets-18, ResNet-50, MedViT, DR-Caps, BP-Caps)
+on the four selected MedMNIST datasets (BreastMNIST, PneumoniaMNIST,
+NoduleMNIST3D, BloodMNIST) simply run:
+
+```bash
+./train_medmnist.sh
+```
+
+## Adversarial Sensitivity:
+
+## Interpretability:
+### Latent Space:
+
+### Grad-Cam:
 
 ## References:
 [Hossain, S., Hossain, S., Sritharan, D., Fu, D., Nene, A., Hossain, J., Chadha, S., Kim, I., Lin, M., Aboian, M. and Aneja, S., 2025. Deep Learning Identified Extra-Prostatic Extension and Seminal Vesicle Invasion as an MRI Biomarker for Prostate Cancer Outcomes. medRxiv, pp.2024-12.](https://www.medrxiv.org/content/10.1101/2024.12.31.24319822v1)

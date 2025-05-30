@@ -9,6 +9,8 @@ capsule networks remain the most robust to these perturbations. Latent-space
 and Grad-Cam visualizations reveal that capsule networks maintain more
 stable feature spaces and attention maps after the attacks.
 
+![Overview Figure](figs/fig1.png)
+
 ## Contents:
 Use these links to easily navigate through this readme:
 

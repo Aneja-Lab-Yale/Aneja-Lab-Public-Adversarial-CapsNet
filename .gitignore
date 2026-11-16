@@ -1,4 +1,29 @@
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+
+# Downloaded data and trained weights
+/data/
+/checkpoints/
 *.pth
+
+# Runtime logs and generated experiment results
+/logs/
+/adv_output/
+/transfer_attack_data/
+/gradcam_data/
+/latent_space/
+/inference_benchmarks/
+*.npy
 *.npz
-*.png
-!figs/*.png
+
+# Plotting code and generated figures are not part of the source-only release.
+/scripts/plot/
+/figs/*
+!/figs/fig1.png
+
+# Temporary files
+*.tmp
+.DS_Store

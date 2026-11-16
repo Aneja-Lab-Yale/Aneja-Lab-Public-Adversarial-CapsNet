@@ -1,163 +1,338 @@
 # On the Adversarial Robustness of Medical Capsule Networks
 
 ## Overview
-We train two deep neural networks (ResNet-18, ResNet-50),
-a vision transformer based model (MedViT), and two capsules networks
-(DR-Caps, BP-Caps) on MNIST and four MedMNIST medical classification
-datasets. We test all models against adversarial attacks and find 
-capsule networks remain the most robust to these perturbations. Latent-space
-and Grad-Cam visualizations reveal that capsule networks maintain more
-stable feature spaces and attention maps after the attacks.
+
+This repository trains and evaluates ResNet-18, ResNet-50, MedViT,
+DR-CapsNet, and BP-CapsNet on MNIST and four MedMNIST classification datasets:
+BreastMNIST, PneumoniaMNIST, NoduleMNIST3D, and BloodMNIST. It provides
+reproducible workflows for clean training, white-box adversarial evaluation,
+cross-model transfer attacks, adversarial training, inference benchmarking,
+and clean/adversarial interpretability analysis.
 
 ![Overview Figure](figs/fig1.png)
 
-## Contents:
-Use these links to easily navigate through this readme:
+## Contents
 
-1. [Installation and Set Up](#getting-started)
-2. [File Structure](#file-structure)
-3. [Public Data](#data)
+1. [Installation](#installation)
+2. [Repository structure](#repository-structure)
+3. [Data](#data)
 4. [Training](#training)
-5. [Adversarial Sensitivity](#adversarial-sensitivity)
-6. [Interpretability](#latent-space)
-7. [References](#references)
+5. [Adversarial evaluation](#adversarial-evaluation)
+6. [PGD adversarial training](#pgd-adversarial-training)
+7. [Interpretability](#interpretability)
+8. [Inference benchmarking](#inference-benchmarking)
+9. [Generated artifacts](#generated-artifacts)
+10. [References](#references)
 
+## Installation
 
-
-## Installation and Set Up:
-### Getting Started:
-1) First clone this repository:
+Clone the repository and create the Conda environment:
 
 ```bash
 git clone https://github.com/Aneja-Lab-Yale/Aneja-Lab-Public-Adversarial-CapsNet
-```
-
-2) Navigate to the cloned repository and run the following commands to create the appropriate environment with the appropriate software packages:
-
-```bash
 cd Aneja-Lab-Public-Adversarial-CapsNet
 conda env create -f adversarial_env.yml
-conda activate adversarial_env
+conda activate adv
 ```
 
-3) Create data directory, where MedMnist and Mnist data will be downloaded:
-```bash
-mkdir data
-```
+Run commands from the repository root. Training and evaluation scripts create
+their output directories as needed. Dataset downloads are stored under
+`data/`.
 
-### File Structure:
-The cloned repository will have the following file structure. Descriptions of major folders and files are below:
+## Repository structure
 
-```bash
+The source tree is organized as follows:
+
+```text
 .
-├── data                       # folder to store all MedMnist and MNIST data
-├── models                     # contains model definitions for ResNet, MedViT, and CapsNet models
-    ├── MedViT.py                       # MedViT model definition
-    ├── bpcapsnet.py                    # BP-CapsNet model definition
-    ├── capsnet.py                      # Standard (DR) CapsNet model definition
-    ├── resnets.py                      # ResNet-18 and ResNet-50 model definitions
-├── adversarial_env.yml        # YAML configuration file specifying virtual env details
-├── experiments_medmnist.py    # python code for training all MedMNIST models and running all adversarial sensitivity, latent space, and Grad-Cam experiments
-├── experiments_medmnist.sh    # executable to run all MedMNIST adversarial sensitivity, latent space, and Grad-Cam experiments
-├── experiments_mnist.py       # python code for training all MNIST models and running all adversarial sensitivity, latent space, and Grad-Cam experiments
-├── experiments_mnist.sh       # executable to run all MNIST adversarial sensitivity, latent space, and Grad-Cam experiments
-├── grad_cam.py                # python implementation of Grad-Cam attention map visualization
-├── latent_space.py            # python implementation of feature sapce -> latent space calculations
-├── loss.py                    # python code containing loss functions
-├── sensitivity.py             # python implementation of adversarial attacks and adversarial sensitivity experiments
-├── train_medmnist.sh          # executable to train all MedMNIST models
-├── train_mnist.sh             # executable to train all MNIST models
+├── models/                         # model architectures
+├── scripts/
+│   ├── experiments/                # training and attack implementations
+│   ├── runners/                    # multi-dataset/model workflow launchers
+│   ├── interpretability/           # Grad-CAM and latent-space workflows
+│   ├── analysis/                   # metric summaries and exports
+│   └── benchmarking/               # inference timing worker and runner
+├── loss.py                         # shared model losses
+├── utils.py                        # transforms and evaluators
+└── adversarial_env.yml             # Conda environment
 ```
-## Data:
 
-All data used in this study is publicly available. MNIST is downloaded from the torchvision.datasets module.
-Descriptions of all MedMNIST datasets can be found [here](https://medmnist.com/). For downloading all datasets for our experiments,
-simply include the **--download** flag in the command line arguments (see more detailed information [below](#training)).
+Training and analysis create runtime directories such as `data/`,
+`checkpoints/`, `logs/`, `adv_output/`, `transfer_attack_data/`,
+`gradcam_data/`, `latent_space/`, and `inference_benchmarks/`. These contain
+downloaded data or generated artifacts rather than source code.
 
-## Training:
+## Data
+
+MNIST is downloaded through `torchvision.datasets`. MedMNIST datasets are
+downloaded through the `medmnist` package. Dataset descriptions and licenses
+are available from [MedMNIST](https://medmnist.com/).
+
+The training runners download missing datasets by default. Individual
+experiment commands can use `--download` when the data are not already
+available.
+
+## Training
+
 ### MNIST
-To train all models (ResNets-18, ResNet-50, MedViT, DR-Caps, BP-Caps)
-on MNIST simply run:
+
+Train all five architectures sequentially:
 
 ```bash
-./train_mnist.sh
+python scripts/runners/train_all_mnist.py
 ```
 
+The runner trains each model for 100 epochs by default, writes logs under
+`logs/mnist_training/`, and skips an existing checkpoint unless `--force` is
+used. Model selection uses validation AUC, and the held-out test set is
+evaluated after training with the best-validation model.
+
+Common options include:
+
+```bash
+# Train selected models for a shorter run
+python scripts/runners/train_all_mnist.py \
+  --models resnet18 caps bpcaps \
+  --epochs 10 \
+  --batch-size 32
+
+# Show the commands without starting training
+python scripts/runners/train_all_mnist.py --dry-run
+
+# Retrain models even when checkpoints exist
+python scripts/runners/train_all_mnist.py --force
+```
 
 ### MedMNIST
-To train all models (ResNets-18, ResNet-50, MedViT, DR-Caps, BP-Caps)
-on the four selected MedMNIST datasets (BreastMNIST, PneumoniaMNIST,
-NoduleMNIST3D, BloodMNIST) simply run:
+
+Train all five architectures on the four selected medical datasets:
 
 ```bash
-./train_medmnist.sh
+python scripts/runners/train_all_medmnist.py
 ```
 
-Notes:
-- To only run a certain set of experiments, comment out lines in ARG_LIST
-  corresponding to experiments you wish to exclude.
-- If a certain dataset has not been downloaded, include the **--download** flag in the command line arguments
-  within the appropriate shell script for the first model that uses this dataset.
-- The MedViT model uses the **--resize** flag to resize input images from size (28,28) -> (224, 224)
-  following the original paper.
-- Training for MNIST experiments is currently set to 100 epochs. This may take a while (a few days)
-to run. Good results can be achieved with 5-10 epochs of training. You can change
-the training time in train_mnist.sh with the **--num_epochs** command line argument.
-- Training for MedMNIST datasets is relatively quick and we have found 100 epochs (current default) to result
-  in a reasonable training time.
+Use `--datasets` and `--models` to select a subset. Downloads are enabled by
+default and can be disabled with `--no-download`. The runner automatically
+uses 224x224 inputs and the corresponding `_224` checkpoint name for MedViT.
 
-After training, all models should be stored in a folder called _checkpoints_.
-
-## Adversarial Attacks:
-
-Once all models have been trainined, to run all adversarial sensitivty, latent space, and grad-cam
-experiments for MNIST models simply run:
+For example:
 
 ```bash
-./experiments_mnist.sh
+python scripts/runners/train_all_medmnist.py \
+  --datasets breastmnist pneumoniamnist \
+  --models resnet18 caps bpcaps \
+  --epochs 10
 ```
 
-To run all adversarial sensitivty, latent space, and grad-cam experiments for MNIST models simply run:
+Checkpoints are written under `checkpoints/`.
+
+## Adversarial evaluation
+
+All model inputs are normalized to `[-1, 1]`, and reported attack epsilon
+values use that normalized coordinate system. For example, epsilon `0.064`
+corresponds to approximately `8/255` in the original `[0, 1]` pixel space.
+Attacks optimize classification cross-entropy for every architecture; capsule
+reconstruction loss is excluded from adversarial evaluation.
+
+### FGSM and PGD sweeps
+
+Run the standard nine-epsilon medical sweeps:
 
 ```bash
-./experiments_medmnist.sh
+python scripts/runners/medical_fgsm_sweep.py
+python scripts/runners/medical_pgd_sweep.py
 ```
 
-Notes:
-- To only run a certain set of experiments, comment out lines in ARG_LIST
-  corresponding to experiments you wish to exclude.
-- The **--experiment** argument controls the type of experiment being run.
-  It can be set to {sensitivity, latent_space, grad_cam}.
+The default epsilon sequence is:
 
-### Adversarial Sensitivity:
-In adversarial sensitivity experiments, models are tested against adversarial attacks of
-varying strength (eps = {0.001, 0.002, 0.004, ... 0.256}). To change the attack type, use
-the **--attack_type** argument to choose between {pgd=default, fgsm}. Results will be stored
-as npy files in a folder called _adv_output_.
+```text
+0.001, 0.002, 0.004, 0.008, 0.016, 0.032, 0.064, 0.128, 0.256
+```
 
-### Latent Space:
-In latent space experiments, a model's latent space embeddings for all test set examples are visualized
-before and after an adversarial attack. A tSNE dimensionality reduction is used to reduce the latent embeddings
-into 2D space. To change the attack type, use the **--attack_type** argument to choose between {pgd=default, fgsm}.
-To change the strneght of the attack, use the **--eps** arguments to set the values of epsilon (default=0.032).
-Output will be stored as an npz file with path following latent_space/{dataset_name}/{model_name}/tSNE_latent_data.npz.
-This file contains four np arrays with keys {og_latent, adv_latent, og_targets, adv_targets}. The latent arrays are of
-shape (N,2) representing the 2-dimensional embeddings of all N points. The targets are of shape (N,) representing the
-corresponding labels of all N points.
+Results are written under `adv_output/fgsm/` and `adv_output/pgd/`; logs are
+written under `logs/`. The runners validate completed outputs and support
+`--force`, `--dry-run`, subset selection, and `--continue-on-error`.
 
-### Grad-Cam:
-In Grad-Cam experiments, attention maps for all test set examples are visualized
-before and after an adversarial attack. To change the attack type, use the **--attack_type** argument to choose
-between {pgd=default, fgsm}. To change the strneght of the attack, use the **--eps** arguments to set the values
-of epsilon (default=0.032). Output will be stored as two npy files (original and adversarial) in the gradcam_npy
-folder. Arrays are of shape (N, C, 28, 28) or (N, C, 224, 224) correspondings to N samples, C channels, and 28x28
-or 224x224 input images. Each (C, 28, 28) or (C, 244, 244) image represents an individual Grad-Cam.
+For a custom PGD configuration, invoke the experiment directly. This example
+runs epsilon `0.016` with 100 iterations and five random restarts:
 
-## References:
-[Lei, Y., Wu, Z., Li, Z., Yang, Y. and Liang, Z., 2023. BP-CapsNet: An image-based Deep Learning method for medical diagnosis. *Applied Soft Computing*, 146, 110683.](https://www.sciencedirect.com/science/article/pii/S1568494623007019)
+```bash
+python scripts/experiments/experiments_medmnist.py \
+  --data_flag breastmnist \
+  --model_flag caps \
+  --num_epochs 0 \
+  --model_path checkpoints/caps_breastmnist_best_model.pth \
+  --experiment sensitivity \
+  --attack_type pgd \
+  --attack_epsilons 0.016 \
+  --pgd_max_iter 100 \
+  --pgd_num_random_init 5
+```
 
-[Manzari, O. N., Ahmadabadi, H., Kashiani, H., Shokouhi, S. B., and Ayatollahi, A., 2023. MedViT: A robust vision transformer for generalized medical image classification. *Computers in Biology and Medicine*, 157, 106791.](https://doi.org/10.1016/j.compbiomed.2023.106791)
+### AutoAttack
 
-[Torres, J. and Gildenblat, J., 2021. pytorch-grad-cam: Gradient-weighted Class Activation Mapping (Grad-CAM) in PyTorch. *GitHub repository*.](https://github.com/jacobgil/pytorch-grad-cam)
+Run AutoAttack at epsilon `0.032` for every medical dataset/model pair:
 
-[Yang, J., Shi, R., Wei, D., Liu, Z., Zhao, L., Ke, B., Pfister, H. and Ni, B., 2023. MedMNIST v2—A large-scale lightweight benchmark for 2D and 3D biomedical image classification. *Scientific Data*.](https://www.nature.com/articles/s41597-022-01721-8)
+```bash
+python scripts/runners/medical_autoattack_runner.py
+```
+
+Use `--epsilon` to select another budget.
+
+### PGD transfer attacks
+
+Generate PGD source sets and evaluate each set against the other four
+architectures:
+
+```bash
+python scripts/runners/pgd_transfer_runner.py
+```
+
+The default epsilon is `0.016`. MNIST uses a deterministic 1,000-image subset;
+the medical datasets use their complete test sets. Source archives are stored
+under `transfer_attack_data/`, metrics under `adv_output/transfer/`, and logs
+under `logs/pgd_transfer/`.
+
+### CW-L2
+
+Run CW-L2 on a single checkpoint through the main experiment entry point:
+
+```bash
+python scripts/experiments/experiments_medmnist.py \
+  --data_flag breastmnist \
+  --model_flag caps \
+  --num_epochs 0 \
+  --model_path checkpoints/caps_breastmnist_best_model.pth \
+  --experiment sensitivity \
+  --attack_type cw
+```
+
+The standard CW-L2 configuration uses 500 optimization iterations and ten
+binary-search steps. It attacks initially correct examples and records
+adversarial accuracy, AUC, attack success rate, failures, and successful-attack
+L2 statistics. L2 distances are reported in the model-input `[0, 1]` pixel
+space.
+
+For reproducible shared or model-specific cohorts, use the budgeted runner:
+
+```bash
+python scripts/runners/experiments_cw_budgeted.py \
+  --datasets bloodmnist \
+  --models resnet18 resnet50 caps bpcaps \
+  --selection shared-correct \
+  --num-cases 300 \
+  --initial-const 0.01 \
+  --output-dir adv_output/cw/blood_shared300 \
+  --download
+```
+
+Sweep the CW trade-off constant for CapsNet or BP-CapsNet with:
+
+```bash
+python scripts/runners/experiments_cw_const_sweep.py \
+  --model caps \
+  --initial-const 0.01 0.1 1 10
+```
+
+## PGD adversarial training
+
+MedMNIST training supports label-aware, in-loop PGD adversarial examples:
+
+```bash
+python scripts/experiments/experiments_medmnist.py \
+  --data_flag breastmnist \
+  --model_flag resnet18 \
+  --num_epochs 100 \
+  --download \
+  --adversarial_training \
+  --adv_eps 0.016 \
+  --adv_steps 7
+```
+
+`--adv_step_size` defaults to `adv_eps / 4`. Use `--adv_clean_weight` to mix
+clean and adversarial losses, or `--no_adv_random_start` to disable the random
+start. Adversarially trained checkpoints use a distinct
+`_pgd_at_eps_<epsilon>_best_model.pth` suffix and record their training
+configuration.
+
+## Interpretability
+
+Interpretability workflows consume saved PGD source archives produced by the
+transfer runner.
+
+### Latent-space embeddings
+
+Generate clean/adversarial latent features and joint t-SNE embeddings:
+
+```bash
+python scripts/interpretability/generate_tsne_embeddings.py \
+  --epsilon 0.016 \
+  --device cuda
+```
+
+Results are stored under
+`latent_space/pgd_eps_0.016/<dataset>/<model>/`. Use `--skip-tsne` to extract
+features without fitting t-SNE or `--overwrite` to replace completed outputs.
+
+### Grad-CAM
+
+Generate paired clean/adversarial Grad-CAM maps:
+
+```bash
+python scripts/interpretability/generate_gradcam_maps.py \
+  --epsilon 0.016 \
+  --device cuda
+```
+
+Results are stored under
+`gradcam_data/pgd_eps_0.016/<dataset>/<model>/gradcam_maps.npz`. Summarize
+clean/adversarial top-pixel overlap with:
+
+```bash
+python scripts/analysis/calculate_gradcam_similarity.py --epsilon 0.016
+```
+
+## Inference benchmarking
+
+Benchmark every available dataset/model checkpoint and create a CSV summary:
+
+```bash
+python scripts/benchmarking/inference_benchmark_runner.py
+```
+
+Use `--datasets`, `--models`, `--batch-size`, and `--device` to restrict or
+configure a run. Results are written under `inference_benchmarks/`, with logs
+under `logs/inference_benchmarks/`.
+
+## Generated artifacts
+
+Downloaded datasets, checkpoints, logs, attack archives, numerical results,
+benchmark results, and generated figures are runtime artifacts. They are not
+required to understand or install the source code and may be omitted from a
+source-only distribution. The relevant directories are:
+
+```text
+data/
+checkpoints/
+logs/
+adv_output/
+transfer_attack_data/
+gradcam_data/
+latent_space/
+inference_benchmarks/
+figs/                  # except intentionally published static figures
+```
+
+## References
+
+- Lei, Y., Wu, Z., Li, Z., Yang, Y. and Liang, Z. (2023). BP-CapsNet: An
+  image-based deep learning method for medical diagnosis. *Applied Soft
+  Computing*, 146, 110683.
+- Manzari, O. N., Ahmadabadi, H., Kashiani, H., Shokouhi, S. B. and Ayatollahi,
+  A. (2023). MedViT: A robust vision transformer for generalized medical image
+  classification. *Computers in Biology and Medicine*, 157, 106791.
+- Torres, J. and Gildenblat, J. (2021). pytorch-grad-cam: Gradient-weighted
+  class activation mapping in PyTorch.
+- Yang, J., Shi, R., Wei, D., Liu, Z., Zhao, L., Ke, B., Pfister, H. and Ni, B.
+  (2023). MedMNIST v2—A large-scale lightweight benchmark for 2D and 3D
+  biomedical image classification. *Scientific Data*.
